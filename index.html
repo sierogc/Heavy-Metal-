@@ -6,16 +6,12 @@
 <title>Black Metal</title>
 
 <style>
-  /* === STILI DI BASE === */
   body {
     margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-height: 100vh;
     background-color: black;
     font-family: Arial, sans-serif;
-    overflow-y: auto; /* abilita lo scroll verticale */
+    overflow-y: auto;
     overflow-x: hidden;
   }
 
@@ -26,10 +22,9 @@
     line-height: 1.2;
     text-align: justify;
     text-align-last: right;
-    transition: opacity 1s ease; /* transizione morbida per fade */
+    color: white;
   }
 
-  /* === RESPONSIVE DESIGN === */
   @media screen and (max-width: 768px) {
     #text-container { max-width: 90%; font-size: 11vw; }
   }
@@ -37,12 +32,12 @@
     #text-container { max-width: 95%; font-size: 13vw; }
   }
 
-  /* === EFFETTI TIPOGRAFICI === */
+  /* Tipi di effetto */
   .underline { text-decoration: underline; }
   .italic { font-style: italic; }
   .strikethrough { text-decoration: line-through; }
 
-  /* === EVIDENZIATORI === */
+  /* Evidenziatori */
   .highlight-red { background-color: #ff4d4d; color: black; }
   .highlight-orange { background-color: #ffa64d; color: black; }
   .highlight-yellow { background-color: #ffff66; color: black; }
@@ -56,7 +51,7 @@
   .highlight-lime { background-color: #b3ff66; color: black; }
   .highlight-gold { background-color: #ffd700; color: black; }
 
-  /* === COLORI TESTO === */
+  /* Colori testo */
   .red { color: #ff4d4d; }
   .orange { color: #ffa64d; }
   .yellow { color: #ffff66; }
@@ -70,155 +65,110 @@
   .lime { color: #b3ff66; }
   .gold { color: #ffd700; }
   .magenta { color: #ff33cc; }
-
-  /* === ANIMAZIONE ENTRATA === */
-  .fade-in { opacity: 0; animation: fade 0.5s forwards; }
-  @keyframes fade { to { opacity: 1; } }
 </style>
 </head>
 <body>
 <div id="text-container"></div>
 
 <script>
-/* === TESTO ORIGINALE === */
 const originalText = "Questo è un test avanzato: le parole appariranno parola per parola, resteranno visibili, cambieranno colore ed effetto, e poi la frase si mixerà e ricomincerà.";
 
-/* === ARRAY COLORI === */
-const textColors = [
-  "red","orange","yellow","green","blue","indigo","violet",
-  "white","pink","cyan","lime","gold","magenta"
-];
+const textColors = ["red","orange","yellow","green","blue","indigo","violet","white","pink","cyan","lime","gold","magenta"];
+const highlightColors = ["highlight-red","highlight-orange","highlight-yellow","highlight-green","highlight-blue","highlight-indigo","highlight-violet","highlight-white","highlight-pink","highlight-cyan","highlight-lime","highlight-gold"];
 
-const highlightColors = [
-  "highlight-red","highlight-orange","highlight-yellow",
-  "highlight-green","highlight-blue","highlight-indigo",
-  "highlight-violet","highlight-white","highlight-pink",
-  "highlight-cyan","highlight-lime","highlight-gold"
-];
-
-/* === PARAMETRI MODIFICABILI === */
 let container = document.getElementById("text-container");
-let delay = 900;          // tempo tra una parola e l'altra
-let effectDelay = 400;    // velocità di variazione effetti
-let activeTime = 10000;   // tempo in ms in cui il testo resta visibile (10s)
-let blackPause = 6000;    // durata pausa schermo nero (6s)
+let activeTime = 15000;  // durata testo visibile
+let blackPause = 6000;    // pausa nera
 let lastColor = null;
-let previousOrders = [];  // per memorizzare gli ordini usati
-let firstCycle = true;    // flag per sapere se è la prima generazione
+let previousOrders = [];
+let firstCycle = true;
+let animationInterval = null;
 
-/* === FUNZIONE: applica effetti casuali a una parola === */
+// Applica effetti casuali a una parola
 function randomEffect(wordEl){
-    wordEl.classList.remove(
-      "underline","italic","strikethrough",
-      ...highlightColors, ...textColors
-    );
+    wordEl.classList.remove(...textColors, ...highlightColors, "underline","italic","strikethrough");
 
-    // Sceglie un colore testo casuale (non uguale all'ultimo)
     let color;
-    do {
-      color = textColors[Math.floor(Math.random() * textColors.length)];
-    } while(color === lastColor);
+    do { color = textColors[Math.floor(Math.random() * textColors.length)]; } 
+    while(color === lastColor);
     lastColor = color;
     wordEl.classList.add(color);
 
-    // Sceglie un evidenziatore diverso dal colore
     let validHighlights = highlightColors.filter(h => !h.includes(color));
     const highlight = validHighlights[Math.floor(Math.random() * validHighlights.length)];
-    if (highlight) wordEl.classList.add(highlight);
+    if(highlight) wordEl.classList.add(highlight);
 
-    // Aggiunge effetti tipografici casuali
     const effects = ["underline","italic","strikethrough",""];
     const eff = effects[Math.floor(Math.random() * effects.length)];
     if(eff) wordEl.classList.add(eff);
 }
 
-/* === FUNZIONE: genera il testo parola per parola === */
-function generateText(words, callback){
+// Genera tutte le parole subito
+function generateText(words){
     container.innerHTML = "";
-    let index = 0;
-
-    function addWord(){
-        if(index >= words.length){
-            callback();
-            return;
-        }
-
+    words.forEach(word => {
         const span = document.createElement("span");
-        span.textContent = words[index] + " ";
-        span.classList.add("fade-in");
-
+        span.textContent = word + " ";
         container.appendChild(span);
+        randomEffect(span); // parte subito con effetto
+    });
 
-        // Applica subito effetto anche alla prima parola
-        randomEffect(span);
+    // Scroll automatico
+    requestAnimationFrame(() => {
+        if(container.scrollHeight > window.innerHeight){
+            window.scrollTo({top: container.scrollHeight, behavior: "smooth"});
+        }
+    });
 
-        // Applica effetti progressivamente a tutte le parole
-        const allWords = container.querySelectorAll("span");
-        allWords.forEach((w, i) => {
-            setTimeout(() => randomEffect(w), i * effectDelay);
-        });
-
-        index++;
-
-        // Scroll automatico quando il testo supera la finestra
-        requestAnimationFrame(() => {
-            if (container.scrollHeight > window.innerHeight) {
-                window.scrollTo({
-                    top: container.scrollHeight,
-                    behavior: "smooth"
-                });
-            }
-        });
-
-        setTimeout(addWord, delay);
-    }
-
-    addWord();
+    // Animazione ciclica continua
+    startContinuousEffects();
 }
 
-/* === FUNZIONE: mescola array parole === */
+// Ferma animazioni precedenti
+function stopContinuousEffects(){
+    if(animationInterval) clearInterval(animationInterval);
+}
+
+// Animazione ciclica di tutte le parole
+function startContinuousEffects(){
+    stopContinuousEffects();
+    animationInterval = setInterval(() => {
+        const words = container.querySelectorAll("span");
+        words.forEach(w => randomEffect(w));
+    }, 400);
+}
+
+// Mescola array parole evitando ripetizioni
 function shuffleArray(array){
-    // crea una nuova copia per non modificare l’originale
-    let newArr;
-    let alreadyUsed = true;
-
-    // genera una nuova disposizione finché non è unica
+    let newArr, alreadyUsed;
     do {
-      newArr = array.slice().sort(() => Math.random());
-      alreadyUsed = previousOrders.some(order =>
-        order.join(" ") === newArr.join(" ")
-      );
+        newArr = array.slice().sort(() => Math.random() - 0.5);
+        alreadyUsed = previousOrders.some(order => order.join(" ") === newArr.join(" "));
     } while(alreadyUsed);
-
-    // salva questo ordine per evitare ripetizioni future
     previousOrders.push(newArr.slice());
-
     return newArr;
 }
 
-/* === FUNZIONE: ciclo infinito === */
+// Ciclo infinito
 function startCycle(){
     const words = originalText.split(" ");
-
-    // Se è la prima volta → ordine originale
     const sequence = firstCycle ? words : shuffleArray(words);
 
-    generateText(sequence, () => {
+    generateText(sequence);
+
+    setTimeout(() => {
+        stopContinuousEffects();
+        container.style.opacity = 0; // fade al nero
         setTimeout(() => {
-            // Fade al nero per la pausa
-            container.style.opacity = 0;
-            setTimeout(() => {
-                container.style.opacity = 1;
-                firstCycle = false; // dalla prossima volta sarà random
-                startCycle(); // ricomincia
-            }, blackPause);
-        }, activeTime);
-    });
+            container.style.opacity = 1;
+            firstCycle = false;
+            startCycle();
+        }, blackPause);
+    }, activeTime);
 }
 
-/* === AVVIO === */
+// Avvio
 startCycle();
-
 </script>
 </body>
 </html>
