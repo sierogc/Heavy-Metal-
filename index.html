@@ -1,109 +1,130 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heavy Metal!</title>
-  <style>
-    body {
-      background-color: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      font-size: 5vw; 
-      margin: 0;
-      padding: 2rem;
-      line-height: 1.4;
-      overflow-y: hidden; /* Scroll gestito manualmente */
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Testo Animato Giustificato</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* centrato orizzontalmente */
+    align-items: center;     /* centrato verticalmente */
+    background-color: black;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
 
-    #text-container {
-      max-width: 90%;
-      text-align: justify;  /* Giustificato */
-      hyphens: none;        /* No trattini automatici */
-      word-wrap: normal;
-    }
+  #text-container {
+    max-width: 90%;
+    font-size: 8vw;
+    line-height: 1.2;
+    hyphens: none;
+    word-wrap: normal;
+    text-align: justify;       /* giustificato */
+    text-align-last: right;    /* ultima riga a destra */
+    transition: opacity 1.5s ease;
+  }
 
-    /* Ultima riga allineata a destra */
-    #text-container::after {
-      content: "";
-      display: inline-block;
-      width: 100%;
-      text-align: right;
-    }
+  .underline { text-decoration: underline; }
+  .italic { font-style: italic; }
+  .strikethrough { text-decoration: line-through; }
 
-    /* Effetti base */
-    .underline { text-decoration: underline; }
-    .italic { font-style: italic; }
-    .strikethrough { text-decoration: line-through; }
+  .red { color: #ff4d4d; }
+  .orange { color: #ffa64d; }
+  .yellow { color: #ffff66; }
+  .green { color: #80ff80; }
+  .blue { color: #66b3ff; }
+  .indigo { color: #9999ff; }
+  .violet { color: #e580ff; }
+  .white { color: #ffffff; }
 
-    /* Colori arcobaleno */
-    .red { color: #ff4d4d; }
-    .orange { color: #ffa64d; }
-    .yellow { color: #ffff66; }
-    .green { color: #80ff80; }
-    .blue { color: #66b3ff; }
-    .indigo { color: #9999ff; }
-    .violet { color: #e580ff; }
-
-    /* Animazione apparizione */
-    .fade-in {
-      opacity: 0;
-      animation: fade 0.6s forwards;
-    }
-    @keyframes fade {
-      to { opacity: 1; }
-    }
-  </style>
+  .fade-in { opacity: 0; animation: fade 0.6s forwards; }
+  @keyframes fade { to { opacity: 1; } }
+</style>
 </head>
 <body>
-  <div id="text-container"></div>
+<div id="text-container"></div>
 
-  <script>
-    const text = "Questo è un esempio di testo che apparirà parola per parola, giustificato, senza trattini automatici e con effetti casuali sulle parole precedenti.";
-    const container = document.getElementById("text-container");
-    const words = text.split(" ");
-    const rainbowColors = ["red","orange","yellow","green","blue","indigo","violet"];
-    let lastColor = null;
+<script>
+const originalText = "Questo è un test avanzato: le parole appariranno parola per parola, resteranno visibili, cambieranno colore ed effetto, e poi la frase si mixerà e ricomincerà.";
+const rainbowColors = ["red","orange","yellow","green","blue","indigo","violet","white"];
+let container = document.getElementById("text-container");
+let delay = 500;
+let lastColor = null;
+
+// Applica effetti casuali a una parola
+function randomEffect(wordEl){
+    wordEl.className = "";
+    let color;
+    do {
+        color = rainbowColors[Math.floor(Math.random()*rainbowColors.length)];
+    } while(color === lastColor);
+    lastColor = color;
+    wordEl.classList.add(color);
+
+    const effects = ["underline","italic","strikethrough",""];
+    const eff = effects[Math.floor(Math.random()*effects.length)];
+    if(eff) wordEl.classList.add(eff);
+}
+
+// Genera il testo parola per parola
+function generateText(words, callback){
+    container.innerHTML = "";
     let index = 0;
-    const delay = 500;
-
-    function randomEffect(wordEl){
-      wordEl.className = "";
-      // Colore casuale diverso dal precedente
-      let color;
-      do { color = rainbowColors[Math.floor(Math.random()*rainbowColors.length)]; } 
-      while(color === lastColor);
-      lastColor = color;
-      wordEl.classList.add(color);
-
-      // Effetto casuale
-      const effects = ["underline","italic","strikethrough",""];
-      const eff = effects[Math.floor(Math.random()*effects.length)];
-      if(eff) wordEl.classList.add(eff);
-    }
 
     function addWord(){
-      if(index >= words.length) return;
+        if(index >= words.length){
+            callback();
+            return;
+        }
 
-      const span = document.createElement("span");
-      span.textContent = words[index] + " ";
-      span.classList.add("fade-in");
-      container.appendChild(span);
+        const span = document.createElement("span");
+        span.textContent = words[index] + " ";
+        span.classList.add("fade-in");
+        container.appendChild(span);
 
-      // Aggiorna tutte le parole
-      container.querySelectorAll("span").forEach(w => randomEffect(w));
+        // Effetti casuali a partire dalla quarta parola
+        if(index >= 3){
+            container.querySelectorAll("span").forEach(w => randomEffect(w));
+        }
 
-      // Scroll se il testo supera l’altezza della finestra
-      if(container.scrollHeight > window.innerHeight){
-        window.scrollTo({ top: container.scrollHeight - window.innerHeight, behavior: "smooth" });
-      }
+        // Scroll se necessario
+        if(container.scrollHeight > window.innerHeight){
+            window.scrollTo({ top: container.scrollHeight - window.innerHeight, behavior: "smooth" });
+        }
 
-      index++;
-      setTimeout(addWord, delay);
+        index++;
+        setTimeout(addWord, delay);
     }
 
     addWord();
-  </script>
+}
+
+// Mescola le parole
+function shuffleArray(array){
+    return array.sort(() => Math.random() - 0.5);
+}
+
+// Ciclo infinito: genera -> fade out -> rigenera
+function startCycle(){
+    const words = originalText.split(" ");
+    generateText(words, () => {
+        setTimeout(()=>{
+            container.style.opacity = 0;
+            setTimeout(()=>{
+                container.style.opacity = 1;
+                const shuffled = shuffleArray(words.slice());
+                generateText(shuffled, () => {
+                    startCycle();
+                });
+            }, 1500);
+        }, 2000);
+    });
+}
+
+startCycle();
+</script>
 </body>
 </html>
