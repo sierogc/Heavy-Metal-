@@ -6,62 +6,58 @@
 <title>Black Metal</title>
 
 <style>
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background-color: black;
-    font-family: Arial, sans-serif;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: black;
+  font-family: Arial, sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
-  #text-container {
-    max-width: 65%;
-    margin: 5vh auto;
-    font-size: 7vw;
-    line-height: 1.2;
-    text-align: justify;
-    text-align-last: right;
-    color: white;
-  }
+#text-container {
+  max-width: 65%;
+  margin: 5vh auto;
+  font-size: 7vw;
+  line-height: 1.2;
+  text-align: justify;
+  text-align-last: right;
+  color: white;
+}
 
-  @media screen and (max-width: 768px) {
-    #text-container { max-width: 90%; font-size: 11vw; }
-  }
-  @media screen and (max-width: 480px) {
-    #text-container { max-width: 95%; font-size: 13vw; }
-  }
+@media screen and (max-width: 768px) { #text-container { max-width: 90%; font-size: 11vw; } }
+@media screen and (max-width: 480px) { #text-container { max-width: 95%; font-size: 13vw; } }
 
-  .underline { text-decoration: underline; }
-  .italic { font-style: italic; }
-  .strikethrough { text-decoration: line-through; }
+.underline { text-decoration: underline; }
+.italic { font-style: italic; }
+.strikethrough { text-decoration: line-through; }
 
-  .highlight-red { background-color: #ff4d4d; color: black; }
-  .highlight-orange { background-color: #ffa64d; color: black; }
-  .highlight-yellow { background-color: #ffff66; color: black; }
-  .highlight-green { background-color: #80ff80; color: black; }
-  .highlight-blue { background-color: #66b3ff; color: black; }
-  .highlight-indigo { background-color: #9999ff; color: black; }
-  .highlight-violet { background-color: #e580ff; color: black; }
-  .highlight-white { background-color: #ffffff; color: black; }
-  .highlight-pink { background-color: #ff66b2; color: black; }
-  .highlight-cyan { background-color: #66ffff; color: black; }
-  .highlight-lime { background-color: #b3ff66; color: black; }
-  .highlight-gold { background-color: #ffd700; color: black; }
+.highlight-red { background-color: #ff4d4d; color: black; }
+.highlight-orange { background-color: #ffa64d; color: black; }
+.highlight-yellow { background-color: #ffff66; color: black; }
+.highlight-green { background-color: #80ff80; color: black; }
+.highlight-blue { background-color: #66b3ff; color: black; }
+.highlight-indigo { background-color: #9999ff; color: black; }
+.highlight-violet { background-color: #e580ff; color: black; }
+.highlight-white { background-color: #ffffff; color: black; }
+.highlight-pink { background-color: #ff66b2; color: black; }
+.highlight-cyan { background-color: #66ffff; color: black; }
+.highlight-lime { background-color: #b3ff66; color: black; }
+.highlight-gold { background-color: #ffd700; color: black; }
 
-  .red { color: #ff4d4d; }
-  .orange { color: #ffa64d; }
-  .yellow { color: #ffff66; }
-  .green { color: #80ff80; }
-  .blue { color: #66b3ff; }
-  .indigo { color: #9999ff; }
-  .violet { color: #e580ff; }
-  .white { color: #ffffff; }
-  .pink { color: #ff66b2; }
-  .cyan { color: #66ffff; }
-  .lime { color: #b3ff66; }
-  .gold { color: #ffd700; }
-  .magenta { color: #ff33cc; }
+.red { color: #ff4d4d; }
+.orange { color: #ffa64d; }
+.yellow { color: #ffff66; }
+.green { color: #80ff80; }
+.blue { color: #66b3ff; }
+.indigo { color: #9999ff; }
+.violet { color: #e580ff; }
+.white { color: #ffffff; }
+.pink { color: #ff66b2; }
+.cyan { color: #66ffff; }
+.lime { color: #b3ff66; }
+.gold { color: #ffd700; }
+.magenta { color: #ff33cc; }
 </style>
 </head>
 <body>
@@ -74,67 +70,69 @@ const textColors = ["red","orange","yellow","green","blue","indigo","violet","wh
 const highlightColors = ["highlight-red","highlight-orange","highlight-yellow","highlight-green","highlight-blue","highlight-indigo","highlight-violet","highlight-white","highlight-pink","highlight-cyan","highlight-lime","highlight-gold"];
 
 let container = document.getElementById("text-container");
-let activeTime = 15000;
-let blackPause = 6000;
+let delay = 400;          // tempo tra parole
+let activeTime = 15000;   // tempo testo visibile
+let blackPause = 6000;    // pausa nera
 let lastColor = null;
 let previousOrders = [];
 let firstCycle = true;
+let wordIntervals = [];   // intervalli animazioni per ogni parola
 
-// Animazioni per ogni parola
-let wordIntervals = [];
-
-// Funzione per applicare effetti casuali
 function randomEffect(wordEl){
     wordEl.classList.remove(...textColors, ...highlightColors, "underline","italic","strikethrough");
-
     let color;
     do { color = textColors[Math.floor(Math.random() * textColors.length)]; } 
     while(color === lastColor);
     lastColor = color;
     wordEl.classList.add(color);
-
     let validHighlights = highlightColors.filter(h => !h.includes(color));
     const highlight = validHighlights[Math.floor(Math.random() * validHighlights.length)];
     if(highlight) wordEl.classList.add(highlight);
-
     const effects = ["underline","italic","strikethrough",""];
     const eff = effects[Math.floor(Math.random() * effects.length)];
     if(eff) wordEl.classList.add(eff);
 }
 
-// Genera testo e avvia animazione immediata per ogni parola
-function generateText(words){
+// Funzione principale: genera parola per parola
+function generateText(words, callback){
     container.innerHTML = "";
-    // pulisce vecchi intervalli
     wordIntervals.forEach(i => clearInterval(i));
     wordIntervals = [];
+    let index = 0;
 
-    words.forEach(word => {
+    function addWord(){
+        if(index >= words.length){
+            callback();
+            return;
+        }
         const span = document.createElement("span");
-        span.textContent = word + " ";
+        span.textContent = words[index] + " ";
         container.appendChild(span);
-        randomEffect(span); // effetto iniziale subito
 
-        // Animazione ciclica indipendente per ogni parola
+        // Animazione ciclica immediata
+        randomEffect(span);
         const interval = setInterval(() => randomEffect(span), 400);
         wordIntervals.push(interval);
-    });
 
-    // Scroll automatico
-    requestAnimationFrame(() => {
-        if(container.scrollHeight > window.innerHeight){
-            window.scrollTo({top: container.scrollHeight, behavior: "smooth"});
-        }
-    });
+        // Scroll automatico
+        requestAnimationFrame(() => {
+            if(container.scrollHeight > window.innerHeight){
+                window.scrollTo({top: container.scrollHeight, behavior: "smooth"});
+            }
+        });
+
+        index++;
+        setTimeout(addWord, delay);
+    }
+
+    addWord();
 }
 
-// Ferma tutte le animazioni
 function stopAllWordEffects(){
     wordIntervals.forEach(i => clearInterval(i));
     wordIntervals = [];
 }
 
-// Mescola array evitando ripetizioni
 function shuffleArray(array){
     let newArr, alreadyUsed;
     do {
@@ -145,22 +143,20 @@ function shuffleArray(array){
     return newArr;
 }
 
-// Ciclo infinito
 function startCycle(){
     const words = originalText.split(" ");
     const sequence = firstCycle ? words : shuffleArray(words);
-
-    generateText(sequence);
-
-    setTimeout(() => {
-        stopAllWordEffects();
-        container.style.opacity = 0;
+    generateText(sequence, () => {
         setTimeout(() => {
-            container.style.opacity = 1;
-            firstCycle = false;
-            startCycle();
-        }, blackPause);
-    }, activeTime);
+            stopAllWordEffects();
+            container.style.opacity = 0;
+            setTimeout(() => {
+                container.style.opacity = 1;
+                firstCycle = false;
+                startCycle();
+            }, blackPause);
+        }, activeTime);
+    });
 }
 
 startCycle();
