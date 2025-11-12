@@ -4,28 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Black Metal</title>
+
 <style>
+  /* --- STILE BASE DELLA PAGINA --- */
   body {
     margin: 0;
     height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center;      /* centra orizzontalmente */
+    align-items: center;          /* centra verticalmente */
     background-color: black;
     font-family: Arial, sans-serif;
-    overflow: hidden;
+    overflow-y: auto;             /* consente lo scroll automatico se serve */
+    overflow-x: hidden;
   }
 
+  /* --- CONTENITORE TESTO --- */
   #text-container {
-    max-width: 65%;
+    max-width: 65%;               /* margini laterali — aumenta o diminuisci per più o meno larghezza */
     margin: 0 auto;
-    font-size: 7vw;
+    font-size: 7vw;               /* grandezza del testo (usa % o vw per adattarsi agli schermi) */
     line-height: 1.2;
-    text-align: justify;
-    text-align-last: right;
-    transition: opacity 3s ease;
+    text-align: justify;          /* testo giustificato */
+    text-align-last: right;       /* ultima riga allineata a destra */
+    transition: opacity 6s ease;  /* durata del fade (modificabile) */
+    color: white;
   }
 
+  /* --- RESPONSIVE PER SCHERMI PICCOLI --- */
   @media screen and (max-width: 768px) {
     #text-container { max-width: 90%; font-size: 11vw; }
   }
@@ -33,12 +39,12 @@
     #text-container { max-width: 95%; font-size: 12vw; }
   }
 
-  /* Effetti base */
+  /* --- EFFETTI TIPOGRAFICI --- */
   .underline { text-decoration: underline; }
   .italic { font-style: italic; }
   .strikethrough { text-decoration: line-through; }
 
-  /* Evidenziatori */
+  /* --- EVIDENZIATORI (background) --- */
   .highlight-red { background-color: #ff4d4d; color: black; }
   .highlight-orange { background-color: #ffa64d; color: black; }
   .highlight-yellow { background-color: #ffff66; color: black; }
@@ -52,7 +58,7 @@
   .highlight-lime { background-color: #b3ff66; color: black; }
   .highlight-gold { background-color: #ffd700; color: black; }
 
-  /* Colori testo */
+  /* --- COLORI DEL TESTO --- */
   .red { color: #ff4d4d; }
   .orange { color: #ffa64d; }
   .yellow { color: #ffff66; }
@@ -66,7 +72,12 @@
   .lime { color: #b3ff66; }
   .gold { color: #ffd700; }
   .magenta { color: #ff33cc; }
+  .deepblue { color: #3366cc; }
+  .darkred { color: #b30000; }
+  .teal { color: #00cccc; }
+  .olive { color: #808000; }
 
+  /* --- ANIMAZIONE ENTRATA PAROLE --- */
   .fade-in { opacity: 0; animation: fade 0.5s forwards; }
   @keyframes fade { to { opacity: 1; } }
 </style>
@@ -75,34 +86,36 @@
 <div id="text-container"></div>
 
 <script>
+/* --- TESTO ORIGINALE --- */
 const originalText = "Questo è un test avanzato: le parole appariranno parola per parola, resteranno visibili, cambieranno colore ed effetto, e poi la frase si mixerà e ricomincerà.";
 
+/* --- COLORI DISPONIBILI PER LE PAROLE --- */
 const textColors = [
   "red","orange","yellow","green","blue","indigo","violet",
-  "white","pink","cyan","lime","gold","magenta"
+  "white","pink","cyan","lime","gold","magenta","deepblue","darkred","teal","olive"
 ];
 
+/* --- COLORI DISPONIBILI PER GLI EVIDENZIATORI --- */
 const highlightColors = [
-  "highlight-red","highlight-orange","highlight-yellow",
-  "highlight-green","highlight-blue","highlight-indigo",
-  "highlight-violet","highlight-white","highlight-pink",
-  "highlight-cyan","highlight-lime","highlight-gold"
+  "highlight-red","highlight-orange","highlight-yellow","highlight-green","highlight-blue",
+  "highlight-indigo","highlight-violet","highlight-white","highlight-pink","highlight-cyan",
+  "highlight-lime","highlight-gold"
 ];
 
 let container = document.getElementById("text-container");
-let delay = 900;        // tempo tra una parola e l'altra
-let effectDelay = 400;  // velocità effetti
-let lastColor = null;
+let delay = 900;        // tempo (ms) tra una parola e l'altra
+let effectDelay = 500;  // velocità di cambiamento degli effetti
+let lastColor = null;   // ultimo colore usato per evitare ripetizioni
 
-// Applica effetti casuali a una parola
+/* --- FUNZIONE: applica effetti casuali a una parola --- */
 function randomEffect(wordEl){
-    // Rimuove effetti passati
+    // Rimuove tutti gli effetti precedenti
     wordEl.classList.remove(
       "underline","italic","strikethrough",
       ...highlightColors, ...textColors
     );
 
-    // Sceglie colore testo (mai nero e diverso dal precedente)
+    // Scelta colore testo (mai uguale al precedente)
     let color;
     do {
       color = textColors[Math.floor(Math.random() * textColors.length)];
@@ -110,18 +123,21 @@ function randomEffect(wordEl){
     lastColor = color;
     wordEl.classList.add(color);
 
-    // Sceglie evidenziatore diverso dal colore testo
-    let validHighlights = highlightColors.filter(h => !h.includes(color));
-    const highlight = validHighlights[Math.floor(Math.random() * validHighlights.length)];
-    if (highlight) wordEl.classList.add(highlight);
+    // Scelta casuale se aggiungere evidenziatore (circa 50% di probabilità)
+    if(Math.random() < 0.5){
+      // Sceglie evidenziatore che non coincide col colore testo
+      let validHighlights = highlightColors.filter(h => !h.includes(color));
+      const highlight = validHighlights[Math.floor(Math.random() * validHighlights.length)];
+      if (highlight) wordEl.classList.add(highlight);
+    }
 
-    // Effetti tipografici
+    // Effetti tipografici casuali (a volte nessuno)
     const effects = ["underline","italic","strikethrough",""];
     const eff = effects[Math.floor(Math.random() * effects.length)];
     if(eff) wordEl.classList.add(eff);
 }
 
-// Genera il testo parola per parola
+/* --- FUNZIONE: genera il testo parola per parola --- */
 function generateText(words, callback){
     container.innerHTML = "";
     let index = 0;
@@ -132,11 +148,19 @@ function generateText(words, callback){
             return;
         }
 
+        // Crea la parola
         const span = document.createElement("span");
         span.textContent = words[index] + " ";
         span.classList.add("fade-in");
-        if(index === 0) span.classList.add("white"); // prima parola bianca
+
+        // La prima parola è bianca solo all'inizio
+        if(index === 0) span.classList.add("white");
+
+        // Aggiunge la parola al contenitore
         container.appendChild(span);
+
+        // Scrolla verso il basso per seguire la scrittura
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 
         // Applica effetti progressivi a tutte le parole già apparse
         if(index >= 1){
@@ -153,24 +177,27 @@ function generateText(words, callback){
     addWord();
 }
 
-// Mescola parole
+/* --- FUNZIONE: mescola le parole dell'array --- */
 function shuffleArray(array){ return array.sort(() => Math.random() - 0.5); }
 
-// Ciclo infinito
+/* --- FUNZIONE PRINCIPALE: gestisce il ciclo infinito --- */
 function startCycle(){
     const words = originalText.split(" ");
     generateText(words, () => {
+        // La frase completa resta visibile 5 secondi
         setTimeout(() => {
-            container.style.opacity = 0; // fade-out 3s
+            container.style.opacity = 0; // fade-out (5 secondi di durata)
+            // Dopo fade + 5 secondi di nero → restart
             setTimeout(() => {
                 container.style.opacity = 1;
                 const shuffled = shuffleArray(words.slice());
                 generateText(shuffled, () => startCycle());
-            }, 9000); // 6s pausa nera + 3s fade
-        }, 6000); // la frase rimane visibile 6s
+            }, 10000); // 5s nero + 5s fade
+        }, 5000); // pausa visibile 5s
     });
 }
 
+/* --- AVVIO --- */
 startCycle();
 </script>
 </body>
