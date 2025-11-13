@@ -72,7 +72,7 @@ const highlightColors = ["highlight-red","highlight-orange","highlight-yellow","
 let container = document.getElementById("text-container");
 let delay = 400;          // tempo tra una parola e l'altra nella generazione
 let animationSpeed = 900; // velocità animazione ciclica
-let activeTime = 12000;   // durata testo visibile
+let activeTime = 10000;   // durata testo visibile
 let lastColor = null;
 let previousOrders = [];
 let firstCycle = true;
@@ -160,7 +160,7 @@ function deleteText(callback){
         }
         words[index].remove();
         index--;
-        setTimeout(removeWord, delay);
+        setTimeout(removeWord, delay * 0.5);
     }
 
     removeWord();
